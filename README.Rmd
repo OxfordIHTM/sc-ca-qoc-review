@@ -11,12 +11,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-# A template R workflow for general data analysis
+# Seychelles Cancer Quality of Care Literature Review
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-This repository is a template for a [`docker`](https://www.docker.com/get-started)-containerised, [`{targets}`](https://docs.ropensci.org/targets/)-based, [`{renv}`](https://rstudio.github.io/renv/articles/renv.html)-enabled [`R`](https://cran.r-project.org/) workflow for general data analysis.
+This repository is a template for a [`docker`](https://www.docker.com/get-started)-containerised, [`{targets}`](https://docs.ropensci.org/targets/)-based, [`{renv}`](https://rstudio.github.io/renv/articles/renv.html)-enabled [`R`](https://cran.r-project.org/) workflow for Seychelles cancer quality of care literature review.
 
 ## About the Project
 
@@ -27,7 +27,7 @@ This repository is a template for a [`docker`](https://www.docker.com/get-starte
 The project repository is structured as follows:
 
 ```
-sc-policy-review
+sc-ca-qoc-review
     |-- .github/
     |-- data/
     |-- data-raw/
@@ -68,4 +68,5 @@ sc-policy-review
 ### R package dependencies
 
 This project was built using `R 4.5.0`. This project uses the `renv` framework to record R package dependencies and versions. Packages and versions used are recorded in `renv.lock` and code used to manage dependencies is in `renv/` and other files in the root project directory. On starting an R session in the working directory, run `renv::restore()` to install R package dependencies.
+
 
