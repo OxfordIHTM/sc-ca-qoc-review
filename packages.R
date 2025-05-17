@@ -17,10 +17,17 @@ library(quarto)
 
 
 ## Packages for LLM/AI ----
+
 library(ollamar)
 library(ellmer)
 
 
 ## Packages for literature search ----
+
 library(rentrez)
 library(openalexR)
+
+
+## Packages for web scraping ----
+
+library(rvest)
