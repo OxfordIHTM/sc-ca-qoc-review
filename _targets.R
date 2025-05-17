@@ -1,18 +1,21 @@
-################################################################################
-#
-# General Targets Workflow
-#
-################################################################################
+# Seychelles Cancer Quality of Care literature search --------------------------
 
-## Load libraries and custom functions -----------------------------------------
+
+## Load libraries and custom functions ----
 suppressPackageStartupMessages(source("packages.R"))
 for (f in list.files(here::here("R"), full.names = TRUE)) source (f)
 
-## Create targets and list targets objects -------------------------------------
 
-### Data targets
+## Data targets ----
 data_targets <- tar_plan(
-  
+  tar_target(
+    name = sids_list,
+    command = get_sids()
+  ),
+  tar_target(
+    name = sids_islands,
+    command = sids_list$island
+  )
 )
 
 
