@@ -14,6 +14,11 @@ library(tidyr)
 library(openxlsx)
 library(ggplot2)
 library(quarto)
+library(readxl)
+
+
+## Interface with Microsoft ----
+library(Microsoft365R)
 
 
 ## Packages for LLM/AI ----

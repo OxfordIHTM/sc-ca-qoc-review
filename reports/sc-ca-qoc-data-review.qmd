@@ -1,0 +1,675 @@
+---
+title: Data Review
+subtitle: Seychelles Cancer Quality of Care
+author:
+  - name: Ernest Guevarra
+    orcid: 0000-0002-4887-4415
+    email: ernest.guevarra@ndm.ox.ac.uk
+    affiliation: 
+      - name: Centre for Tropical Medicine and Global Health, Nuffield Department of Medicine, University of Oxford
+        city: Oxford
+date: last-modified
+date-format: "DD MMMM YYYY"
+format: 
+  html:
+    toc: true
+    toc-location: left
+    embed-resources: true
+    grid:
+      body-width: 900px
+      margin-width: 300px
+    code-tools:
+      source: https://github.com/OxfordIHTM/sc-ca-qoc-review/blob/main/reports/sc-ca-qoc-data-review.qmd
+    highlight-style: breeze
+engine: knitr
+---
+
+```{r setup}
+#| echo: false
+#| include: false
+
+suppressPackageStartupMessages(source("packages.R"))
+for (f in list.files(here::here("R"), full.names = TRUE)) source (f)
+
+tar_load(extraction_matrix_data)
+```
+
+## Overview
+
+This document provides a review of the raw data produced by the extraction process performed by the student for her Master thesis. The raw dataset has been shared on Microsoft OneDrive.
+
+This review guides the student to what approach to take when working with the data. This review also guides the student on what issues to focus on while cleaning the dataset and provides tips on code that can help with performing these tasks.
+
+## Reading the data
+
+The extraction matrix data can be downloaded in R directly from Microsoft OneDrive using the `{Microsoft365R}` package and through the following bespoke function:
+
+```{r}
+#| label: function-read-onedrive
+#| eval: false
+
+onedrive_download_item <- function(onedrive, 
+                                   src, 
+                                   dest, 
+                                   overwrite = FALSE) {
+  ## Look for file in personal files ----
+  pfiles <- onedrive$list_files()
+
+  if (src %in% pfiles$name) {
+    onedrive$download_file(src, dest = dest, overwrite = overwrite)
+  } else {
+    ## Look for file in shared files ----
+    item_list <- onedrive$list_shared_files()
+    
+    onedrive_item <- lapply(
+      X = item_list, 
+      FUN = function(x) {
+        x$get_path() |>
+          grepl(pattern = src, x = _)
+      }
+    ) |>
+      unlist() |>
+      (\(x) item_list[x])() |>
+      (\(x) x[[1]])()
+
+    onedrive_item$download(dest = dest, overwrite = overwrite)
+  }
+  
+  dest
+}
+```
+
+The function can be used as follows:
+
+```{r}
+#| label: function-read-onedrive-apply
+#| eval: false
+
+onedrive <- Microsoft365R::get_business_onedrive()
+
+onedrive_download_item(
+  onedrive = onedrive, 
+  src = "Extraction_matrix_1.xlsx",
+  dest = "data-raw/extraction_matrix.xlsx",
+  overwrite = FALSE
+)
+```
+
+which downloads the extraction matrix data to a directory called `"data-raw"` (should already be existing) under the filename `extraction_matrix.xlsx`. We can check if indeed such a file has been downloaded by:
+
+```{r}
+#| label: check-download-file
+
+"extraction_matrix.xlsx" %in% list.files("data-raw")
+```
+
+We have verified that the file has been indeed downloaded. We can then read this Excel file into R as follows:
+
+```{r}
+#| label: read-extration-data
+
+extraction_matrix_data <- readxl::read_xlsx("data-raw/extraction_matrix.xlsx")
+```
+
+## Data structure
+
+Data has **`r nrow(extraction_matrix_data)`** rows and **`r ncol(extraction_matrix_data)`**. However, the 23rd column is empty. 
+
+```{r}
+#| label: check-empty-column
+
+extraction_matrix_data[ , 23]
+```
+
+Checking on the original XLSX file on OneDrive, the 23rd column (column W in Excel) is indeed empty. This should be dropped. In R, this can be done as follows:
+
+```{r}
+#| label: remove-empty-column
+
+df <- extraction_matrix_data[ , c(1:22, 24:ncol(extraction_matrix_data))]
+```
+
+We note also that the when the dataset is read into R, the number of records in the data.frame object is 24 rows but we are only expecting 23. When we look at the last row of data, we see:
+
+```{r}
+#| label: check-last-row
+
+tail(df)
+```
+
+The last row doesn't have any data. This usually happens when whitespace has been added into one of the cells in the row after the final row in the actual Excel file. When this file is read into R, the row that doesn't have data but has whitespace is read into R. To avoid this from happening, we can be more specific as to the range of the Excel file to read.
+
+```{r}
+#| label: read-data-clean
+
+df <- readxl::read_xlsx(
+  path = "data-raw/extraction_matrix.xlsx",
+  range = "A1:AE24"
+)
+
+
+df <- df[ , c(1:22, 24:ncol(df))]
+```
+
+Data now has **`r nrow(df)`** rows and **`r ncol(df)`**.
+
+## Variables
+
+The dataset has the following variables:
+
+```{r}
+#| label: data-variables
+
+names(df)
+```
+
+### Title
+
+```{r}
+#| label: title-review
+
+df$Title
+```
+
+* No extra whitespace noted in `Title` variable.
+* No inconsistencies noted.
+
+### Authors
+
+```{r}
+#| label: author-review
+
+df$Authors
+```
+
+* Inconsistent separators used for authors (some using `,`, some `;`). Some use an `and` for the last author and some have a trailing `.` at the end. This will be important to note in the occasion that student might want to perform some analytics on single authors. Some manipulation of the text can be done as follows:
+
+```{r}
+#| label: author-text-manipulation
+
+## Split the authors per publication ----
+df$Authors |>
+  stringr::str_split(pattern = ", |; | and ")
+
+## Count the number of authors per publication ----
+df$Authors |>
+  stringr::str_split(pattern = ", |; | and ") |>
+  lapply(FUN = length) |>
+  unlist()
+```
+
+### Year of Publication
+
+```{r}
+#| label: year-of-pub-review
+
+df |>
+  dplyr::count(`Year of publication`)
+```
+
+* The papers reviewed were published from 2022 to 2025.
+* Issues of **publication bias**[^publicationbias] and **recency bias**[^recencybias] need to be considered and discussed.
+* Need to note also that this is year of publication and this doesn't necessarily mean that the study/experiment/research was done on the same year. It is likely that they were done before that taking into account how long a study may take and how long a paper gets written and published after the study. But in general, recency with regard to when the study was done is still reflected by the year in which the paper is published.
+
+### Article Type
+
+```{r}
+#| label: article-type-review
+
+df |>
+  dplyr::count(`Article Type`)
+```
+
+* All references are from published peer-reviewed journal articles. Important to highlight the possible issues related to publication vs unpublished grey literature[^greyliterature].
+
+### Journal
+
+```{r}
+#| label: journal-review
+
+df |>
+  dplyr::count(Journal)
+```
+
+* There are **`r df |> dplyr::count(Journal) |> nrow()`** different journals in the dataset. This gives a **`r (df |> dplyr::count(Journal) |> nrow()) / nrow(df)`** ratio between the number of unique journals to the number of total publications in the dataset. This would indicate a very diverse source.
+
+### DOI
+
+```{r}
+#| label: doi-review
+
+df$DOI
+```
+
+* Two of the DOIs have leading whitespace. This can be cleaned/corrected as follows:
+
+```{r}
+#| label: doi-edit
+
+df <- df |>
+  dplyr::mutate(DOI = stringr::str_trim(DOI))
+
+df$DOI
+```
+
+### Study type
+
+```{r}
+#| label: study-type-review
+
+df |>
+  dplyr::count(`Study type`)
+```
+
+* Inconsistent naming of the same study type (Qualitative Study, Qualitative study);
+* The categories used for study types are ontologically incoherent. It might be good to re-think these categories and use slightly broader but more robust ontological basis[^studytypes] for the categorisation.
+* There is one record with no study type specified. I think this shouldn't be the case. An appropriate category should be available for studies that doesn't fall within the categories specified/determined beforehand.
+
+### Country
+
+```{r}
+#| label: country-review
+
+df |>
+  dplyr::count(Country)
+```
+
+* One record with more than country specified. The two countries are separated by `,`
+* A more appropriate counting of countries can be done as follows:
+
+```{r}
+#| label: country-count
+
+df$Country |>
+  stringr::str_split(pattern = ", ") |>
+  unlist() |>
+  table() |>
+  data.frame()
+```
+
+### Healthcare setting
+
+```{r}
+#| label: healthcare-setting-review
+
+df |>
+  dplyr::count(`Healthcare setting`)
+```
+
+* Inconsistent naming of the categories for healthcare setting (e.g., Oncology centre, Oncology centres)
+* It is unclear from the values of this variable what the ontological basis is of the categories. For example, why does it matter that one study is set in a cancer treatment centre compared to a cancer treatment unit or a medical oncology department compared to a medical oncology centre?
+
+### Number of participants
+
+```{r}
+#| label: n-participants-review
+
+df$`Number of participants`
+```
+
+* One would expect that a variable named **Number of participants** would be a data type that is a number (numeric or integer). However, this variable is of class `character`:
+
+```{r}
+#| label: n-participants-class
+
+class(df$`Number of participants`)
+```
+
+This is because the student used the text `Unspecified` to classify studies that didn't mention number of participants. For this kind of variable, it is more appropriate to use a coded number as a way to indicate values that are not specified or not available. Or one can also use the value `NA` which will not affect the data type of the variable. This can be corrected easily using R as follows:
+
+```{r}
+#| label: n-participants-edit
+
+df <- df |>
+  dplyr::mutate(
+    `Number of participants` = ifelse(
+      `Number of participants` == "Unspecified", NA, `Number of participants`
+    ) |>
+      as.integer()
+  )
+
+class(df$`Number of participants`)
+```
+
+With this change, one can perform numerical operations on the variable:
+
+```{r}
+#| label: n-participants-central-measure
+
+mean(df$`Number of participants`, na.rm = TRUE)
+median(df$`Number of participants`, na.rm = TRUE)
+```
+
+* It is unclear what the value of this variable is for the kind of study/analysis that is being done. The study types are so disparate that comparing number of participants is like comparing apples and oranges. Number of participants of a qualitative study or a case study will definitely have different number of participants from an RCT or a cross-sectional study.
+
+```{r}
+#| label: summary-n-participants
+#| html-table-processing: none
+#| warning: false
+#| message: false
+
+df |>
+  dplyr::filter(
+    `Study type` %in% c(
+      "Randomised Controlled Trial (RCT)", "Cross-Sectional Study",
+      "Case-study", "Qualitative study", "Qualitative Study"
+    )
+  ) |>
+  dplyr::mutate(
+    `Study type` = ifelse(
+      `Study type` %in% c("Qualitative study", "Qualitative Study"),
+      "Qualitative Study", `Study type`
+    )
+  ) |>
+  dplyr::summarise(
+    n_studies = n(),
+    range_n_participants = paste(
+      range(`Number of participants`, na.rm = TRUE), collapse = " to "
+    ),
+    mean_n_participants = mean(`Number of participants`, na.rm = TRUE),
+    median_n_participants = median(`Number of participants`, na.rm = TRUE),
+    .by = `Study type`
+  ) |>
+  knitr::kable() |>
+  kableExtra::kable_styling(
+    bootstrap_options = c("striped", "bordered"),
+    full_width = FALSE
+  )
+```
+
+As is expected, case studies don't really have a number of participants especially if the case study is not about an individual but about a practice or a setting. The RCTs and the cross-sectional studies have the higher numbers of participants as compared to qualitative studies.
+
+### Percent male and female participants
+
+```{r}
+#| label: sex-percent-review
+
+df |>
+  dplyr::select(dplyr::starts_with("%"))
+```
+
+* As with the `Number of participants` variable, these two variables should also be expected to be numeric as they are percentages. But they are of `character` type.
+
+```{r}
+#| label: sex-percent-class
+
+class(df$`%Female Participants`)
+
+class(df$`%Male Participants`)
+```
+
+* It is usually much better to record these values as the counts rather than percentages given that the percentages can always be calculated separately and allows for other calculations to be done later on as needed. If the student insists to use percentages, it is recommended to record the values as proportions (value not multiplied by 100) so that further calculations using these proportions can be done later on if needed. The `Unspecified` values should be recoded in the same way as shown for the `Number of participants` variable.
+
+### Average Age of participants
+
+```{r}
+#| label: mean-age-participants-review
+
+df |>
+  dplyr::count(`Average Age of participants`)
+```
+
+* Looking at the values for this variable, it seems the variable name is a bit misleading as the values are not really average age but the range of ages of the participants. It is highly recommended to use a more appropriate variable name for this (e.g., age range).
+
+
+### Focus area
+
+```{r}
+#| label: focus-area-review
+
+df |>
+  dplyr::count(`Focus area`)
+```
+
+* Again, stronger and more well-defined definitions for this variable will be important/critical.
+* `Chemotherapy` as a focus area is a bit vague and can be all encompassing for all other values. For example, wouldn't chemotherapy be included in geriatric medical oncology or medical oncology in general as well? If so, why are they separate focus areas?
+* Check spelling of integrated. It is currently spelled as intergrated.
+
+
+### Full text retrieved
+
+```{r}
+#| label: full-text-retrieved-review
+
+df |>
+  dplyr::count(`Full text retrieved`)
+```
+
+* Only values here are `Y` for yes. This is the expectation anyway that only those with full text can be included into the study. So, why is this variable needed?
+
+### Types of KPI identified
+
+```{r}
+#| label: type-kpi-review
+
+df |>
+  dplyr::count(`Type(s) of KPI identified`)
+```
+
+* This variable can have multiple responses for each record. Expected values based on the six domains of healthcare quality of the IOM plus one other domain added by WHO (integration).
+* Check spelling of integration. Should be integration. Currently spelled as intergration.
+* Spelling of `People-centred` is sometimes `People-centre`.
+* Spelling of equity/equitable is `equit`.
+* Spelling of efficiency is effeciency.
+* Individual domains are separated by a `,`; some have a final domain separated by an `and` or a `.`.
+* Inconsistent spelling/capitalisation of the domains.
+* There is use of `people-centred` and then `patient-centred` - are they the same thing?
+* There is an inclusion of `acceptability` which is then added/concatenated with `patient-centred`.
+* There is an inclusion of `accessibility` but this is not a specific domain based on IOM/WHO.
+
+Since each record can have more than one KPI type, we will need to split up the values for each record into individual domains to make tabulations and counts of these. This can be done as follows (including some data cleaning of the issues identified above):
+
+```{r}
+#| label: type-kpi-split
+
+df <- df |>
+  dplyr::mutate(
+    `Type(s) of KPI identified` = stringr::str_remove(
+      string = `Type(s) of KPI identified`, pattern = "[\\.]$"
+    ) |>
+      stringr::str_replace_all(
+        pattern = "People-centred|People centred|People-centre|Patient-Centeredness|people-centeredness", 
+        replacement = "Patient-centred"
+      ) |>
+      stringr::str_replace_all(
+        pattern = "Intergration|intergration|Intergrated|intergrated", replacement = "Integrated"
+      ) |>
+      stringr::str_replace_all(
+        pattern = "Equity|equity", replacement = "Equitable"
+      ) |>
+      stringr::str_replace_all(
+        pattern = "Effeciency", replacement = "Efficiency"
+      ) |>
+      stringr::str_remove(pattern = "Acceptability \\/ ") |>
+      stringr::str_split(pattern = ", and |, |\\. ") |>
+      lapply(FUN = stringr::str_trim) |>
+      lapply(FUN = stringr::str_to_sentence)
+  )
+
+df$`Type(s) of KPI identified`
+```
+
+We can then tally the counts of domains covered by the different studies selected:
+
+```{r}
+#| label: type-kpi-tally
+
+df$`Type(s) of KPI identified` |>
+  unlist() |>
+  table() |>
+  data.frame()
+```
+
+### Details on types of KPIs identified
+
+This variable are text/narratives describing in more detail the KPIs identified. Most of these are direct quotes.
+
+### KPI development methodology - process
+
+* What is the difference of this from the KPI development methodology - validation status?
+
+* When reading the entries for this variable, the content is not really about methodology on the development of the KPI but more of the methodology of the study itself. I think it is important to differentiate KPI development methodology from the methodology of the respective studies.
+
+### KPI validation status
+
+```{r}
+#| label: kpi-validation-review
+
+df$`KPI validation status`
+```
+
+* Unclear from the set of values for this variables what is the ontology of the classification/categorisation of the validation statuses. For example, what does the student mean by external validation as compared to internal validation? And what does adapted from a validated source means? 
+* Clear definition of what is meant by student by validation will be important.
+
+### KPI development methodology - validation status
+
+* What is the difference of this from the KPI development methodology?
+* These seem to be more notes on how the validation of the development methodology was performed? But doesn't seem consistent and again hardly any mention of the development process itself.
+
+### KPI development methodology - frameworks used
+
+* What does the student mean by frameworks?
+* What's the difference from methodology? 
+* Most of these notes are conflated to the methodology as well.
+
+### Implementation level
+
+```{r}
+#| label: implementation-level-review
+
+df |>
+  dplyr::count(`Implementation Level`)
+```
+
+* Based on the values for this variable, it is unclear what the ontological basis for the classification/categorisation is. Is it by geographic/location (i.e., regional, national) or is it service delivery unit (i.e., facility). This is important to delineate because there is great overlap between these categorisations. Facility-level implementation will always happen in any geographical area/location so to distinguish that as a separate category is a bit misleading. If it is about geographical size, then maybe the better terminology is local rather than facility-level?
+
+### Type of implementation challenges identified
+
+* More than one value is entered into this variable. These are separated by `,`.
+* Here we see that there is inconsistency in the values for `Health workforce`, `Health service`, `Health service delivery`, and `Leadership and Governance`. 
+
+We can tidy this up as follows:
+
+```{r}
+#| label: implementation-challenges-review
+
+df <- df |>
+  dplyr::mutate(
+    `Types of Implementation Challenges idenitified` = stringr::str_replace_all(
+      string = `Types of Implementation Challenges idenitified`,
+      pattern = "Health workforce|Healthworkforce",
+      replacement = "Health Workforce"
+    ) |>
+      stringr::str_replace_all(
+        pattern = "Health Services Delivery|Health Service Delivery|Health Services|Health Service",
+        replacement = "Service Delivery"
+      ) |>
+      stringr::str_replace_all(
+        pattern = "Service Delivery", replacement = "Health Services Delivery"
+      ) |>
+      stringr::str_replace_all(
+        pattern = "Leadership/Governance", 
+        replacement = "Leadership and Governance"
+      ) |>
+      stringr::str_split(pattern = ", |,")
+  )
+
+df$`Types of Implementation Challenges idenitified`
+```
+
+With this, if we want to tally the responses for each of the implementation challenges, we can do this:
+
+```{r}
+#| label: implementation-challenges-tab
+
+df$`Types of Implementation Challenges idenitified` |>
+  unlist() |>
+  table() |>
+  data.frame()
+```
+
+### Details on types of implementation challenges identified
+
+This variable is mainly detailed narrative/notes on the implementation challenges identified.
+
+### Types of implementation successes
+
+* More than one value is entered into this variable. These are separated by `,`.
+* This variable uses the same values as the variable on implementation challenges and suffer from similar inconsistencies in how values are spelled.
+
+We can tidy this up as follows:
+
+```{r}
+#| label: implementation-success-review
+
+df <- df |>
+  dplyr::mutate(
+    `Types of Implementation Successes` = stringr::str_replace_all(
+      string = `Types of Implementation Successes`,
+      pattern = "Health workforce|Healthworkforce",
+      replacement = "Health Workforce"
+    ) |>
+      stringr::str_replace_all(
+        pattern = "Health Services Delivery|Health Service Delivery|Health Services|Health Service",
+        replacement = "Service Delivery"
+      ) |>
+      stringr::str_replace_all(
+        pattern = "Service Delivery|Service delivery", 
+        replacement = "Health Services Delivery"
+      ) |>
+      stringr::str_replace_all(
+        pattern = "Leadership/Governance|Leadership and governance", 
+        replacement = "Leadership and Governance"
+      ) |>
+      stringr::str_replace_all(
+        pattern = "Health information systems",
+        replacement = "Health Information Systems"
+      ) |>
+      stringr::str_split(pattern = ", |,")
+  )
+
+df$`Types of Implementation Successes`
+```
+
+With this, if we want to tally the responses for each of the implementation successes, we can do this:
+
+```{r}
+#| label: implementation-successes-tab
+
+df$`Types of Implementation Successes` |>
+  unlist() |>
+  table() |>
+  data.frame()
+```
+
+### Details on types of implementation success
+
+This variable is mainly detailed narrative/notes on the implementation successes identified.
+
+### Measurement frequency
+
+```{r}
+#| label: measurement-frequency-review
+
+df |>
+  dplyr::count(`Measurement Frequency`)
+```
+
+* One of the possible values is more related to the study design rather than on practical measurement frequency should a KPI be adopted. I think important for student to distinguish measurement frequency in relation to the study design vis-a-vis measurement frequency in relation to real-world scenario.
+
+### Key findings
+
+This variable is mainly detailed key findings.
+
+### Recommendations
+
+This variable is mainly detailed recommendations.
+
+
+[^publicationbias]: Here I mean publication bias in more general/broad terms as discussed in this paper - https://www.bmj.com/content/331/7514/433 - which includes language bias, location bias, reference bias.
+
+[^recencybias]: See https://en.wikipedia.org/wiki/Recency_bias.
+
+[^greyliterature]: See https://libguides.kcl.ac.uk/systematicreview/greylit.
+
+[^studytypes]: See https://www.ncbi.nlm.nih.gov/books/NBK390304/; https://unimelb.libguides.com/whichstudytype; https://www.cebm.ox.ac.uk/resources/ebm-tools/study-designs
