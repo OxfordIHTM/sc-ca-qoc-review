@@ -39,7 +39,7 @@ jobs:
         
       - name: Run workflow
         run: |
-          targets::tar_make()
+          targets::tar_make(sids_islands)
         shell: Rscript {0}
         
         
