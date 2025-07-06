@@ -18,12 +18,14 @@ knitr::opts_chunk$set(
 [![License for text](https://img.shields.io/badge/license (for writing)-CC_BY_4.0-blue)](https://creativecommons.org/licenses/by/4.0/)
 [![License for data](https://img.shields.io/badge/license (for data)-CC0-blue)](https://creativecommons.org/public-domain/cc0/)
 [![test targets workflow](https://github.com/OxfordIHTM/sc-ca-qoc-review/actions/workflows/test-targets-workflow.yml/badge.svg)](https://github.com/OxfordIHTM/sc-ca-qoc-review/actions/workflows/test-targets-workflow.yml)
+[![DOI](https://zenodo.org/badge/982718524.svg)](https://doi.org/10.5281/zenodo.15825328)
 <!-- badges: end -->
 
 This repository is a template for a [`docker`](https://www.docker.com/get-started)-containerised, [`{targets}`](https://docs.ropensci.org/targets/)-based, [`{renv}`](https://rstudio.github.io/renv/articles/renv.html)-enabled [`R`](https://cran.r-project.org/) workflow for Seychelles cancer quality of care scoping review.
 
-<!-- ## About the Project -->
-
+<!-- 
+## About the Project
+ -->
 
 ## Repository Structure
 
