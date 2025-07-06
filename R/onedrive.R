@@ -1,15 +1,17 @@
 #'
 #' Find required file/s
 #' 
-#' @param onedrive
 #' @param src
 #' @param dest
 #' @param overwrite
 #' 
 
-onedrive_download_item <- function(onedrive, src, dest, overwrite = FALSE) {
+onedrive_download_item <- function(src, dest, overwrite = FALSE) {
   ## Check if dest exists ----
   if (!file.exists(dest)) {
+    ## Setup One Drive ----
+    onedrive <- Microsoft365R::get_business_onedrive()
+
     ## Look for file in personal files ----
     pfiles <- onedrive$list_files()
 
