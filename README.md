@@ -1,10 +1,18 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Seychelles Cancer Quality of Care Literature Review
+# Seychelles Cancer Quality of Care Scoping Review
 
 <!-- badges: start -->
 
+[![License for
+code](https://img.shields.io/badge/license%20\(for%20code\)-GPL3.0-blue.svg)](https://opensource.org/licenses/gpl-3.0.html)
+[![License for
+text](https://img.shields.io/badge/license%20\(for%20writing\)-CC_BY_4.0-blue)](https://creativecommons.org/licenses/by/4.0/)
+[![License for
+data](https://img.shields.io/badge/license%20\(for%20data\)-CC0-blue)](https://creativecommons.org/public-domain/cc0/)
+[![test targets
+workflow](https://github.com/OxfordIHTM/sc-ca-qoc-review/actions/workflows/test-targets-workflow.yml/badge.svg)](https://github.com/OxfordIHTM/sc-ca-qoc-review/actions/workflows/test-targets-workflow.yml)
 <!-- badges: end -->
 
 This repository is a template for a
@@ -12,7 +20,7 @@ This repository is a template for a
 [`{targets}`](https://docs.ropensci.org/targets/)-based,
 [`{renv}`](https://rstudio.github.io/renv/articles/renv.html)-enabled
 [`R`](https://cran.r-project.org/) workflow for Seychelles cancer
-quality of care literature review.
+quality of care scoping review.
 
 ## About the Project
 
@@ -79,9 +87,61 @@ The project repository is structured as follows:
 
 ### R package dependencies
 
-This project was built using `R 4.5.0`. This project uses the `renv`
+This project was built using `R 4.5.1`. This project uses the `renv`
 framework to record R package dependencies and versions. Packages and
 versions used are recorded in `renv.lock` and code used to manage
 dependencies is in `renv/` and other files in the root project
 directory. On starting an R session in the working directory, run
 `renv::restore()` to install R package dependencies.
+
+### R version
+
+This project was built using R 4.5.1. To manage R versions, it is
+recommended to use [`rig`](https://github.com/r-lib/rig) - an R
+installation manager - to be able to install multiple versions of R and
+switch between them as needed.
+
+### R package dependencies
+
+This project uses the `{renv}` framework to record R package
+dependencies and versions. Packages and versions used are recorded in
+`renv.lock` and code used to manage dependencies is in the `renv`
+directory and other files in the root project directory.
+
+On starting an R session in the working directory of this repository,
+first run
+
+``` r
+renv::restore()
+```
+
+to install R package dependencies.
+
+### The workflow
+
+``` mermaid
+graph LR
+  style Graph fill:#FFFFFF00,stroke:#000000;
+  subgraph Graph
+    direction LR
+    x302aac5a349e94c8(["extraction_matrix_data"]):::skipped --> xf69487b7eb1bdf74(["data_review_report"]):::skipped
+    x81531a598a877851(["extraction_matrix_data_file"]):::completed --> x302aac5a349e94c8(["extraction_matrix_data"]):::skipped
+    xe0cbc1208781fad4(["onedrive"]):::skipped --> x81531a598a877851(["extraction_matrix_data_file"]):::completed
+    xa1f98815230ee6ce(["sids_list"]):::skipped --> xe888894c32b82646(["sids_islands"]):::skipped
+    
+  end
+```
+
+## Authors
+
+  - Nyasha Manyeruke
+  - Ernest Guevarra
+
+## License
+
+All code in this workflow is released under a
+[GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html#license-text)
+license. All text and reports in this workflow is released under a
+[CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/deed.en)
+license. All data is released under a
+[CC0](https://creativecommons.org/public-domain/cc0/) license.
