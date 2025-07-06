@@ -11,12 +11,16 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Seychelles Cancer Quality of Care Literature Review
+# Seychelles Cancer Quality of Care Scoping Review
 
 <!-- badges: start -->
+[![License for code](https://img.shields.io/badge/license (for code)-GPL3.0-blue.svg)](https://opensource.org/licenses/gpl-3.0.html)
+[![License for text](https://img.shields.io/badge/license (for writing)-CC_BY_4.0-blue)](https://creativecommons.org/licenses/by/4.0/)
+[![License for data](https://img.shields.io/badge/license (for data)-CC0-blue)](https://creativecommons.org/public-domain/cc0/)
+[![test targets workflow](https://github.com/OxfordIHTM/sc-ca-qoc-review/actions/workflows/test-targets-workflow.yml/badge.svg)](https://github.com/OxfordIHTM/sc-ca-qoc-review/actions/workflows/test-targets-workflow.yml)
 <!-- badges: end -->
 
-This repository is a template for a [`docker`](https://www.docker.com/get-started)-containerised, [`{targets}`](https://docs.ropensci.org/targets/)-based, [`{renv}`](https://rstudio.github.io/renv/articles/renv.html)-enabled [`R`](https://cran.r-project.org/) workflow for Seychelles cancer quality of care literature review.
+This repository is a template for a [`docker`](https://www.docker.com/get-started)-containerised, [`{targets}`](https://docs.ropensci.org/targets/)-based, [`{renv}`](https://rstudio.github.io/renv/articles/renv.html)-enabled [`R`](https://cran.r-project.org/) workflow for Seychelles cancer quality of care scoping review.
 
 ## About the Project
 
@@ -67,6 +71,46 @@ sc-ca-qoc-review
 
 ### R package dependencies
 
-This project was built using `R 4.5.0`. This project uses the `renv` framework to record R package dependencies and versions. Packages and versions used are recorded in `renv.lock` and code used to manage dependencies is in `renv/` and other files in the root project directory. On starting an R session in the working directory, run `renv::restore()` to install R package dependencies.
+This project was built using `R 4.5.1`. This project uses the `renv` framework to record R package dependencies and versions. Packages and versions used are recorded in `renv.lock` and code used to manage dependencies is in `renv/` and other files in the root project directory. On starting an R session in the working directory, run `renv::restore()` to install R package dependencies.
 
+
+### R version
+
+This project was built using R 4.5.1. To manage R versions, it is recommended to use [`rig`](https://github.com/r-lib/rig) - an R installation manager - to be able to install multiple versions of R and switch between them as needed.
+
+### R package dependencies
+
+This project uses the `{renv}` framework to record R package dependencies and versions. Packages and versions used are recorded in `renv.lock` and code used to manage dependencies is in the `renv` directory and other files in the root project directory.
+
+On starting an R session in the working directory of this repository, first run
+
+```R
+renv::restore()
+```
+
+to install R package dependencies.
+
+### The workflow
+
+```{r full-workflow, echo = FALSE, results = "asis"}
+cat(
+  c(
+    "```mermaid",
+    targets::tar_mermaid(
+      targets_only = TRUE, outdated = FALSE, legend = FALSE, color = FALSE
+    ),
+    "```"
+  ),
+  sep = "\n"
+)
+```
+
+## Authors
+
+* Nyasha Manyeruke
+* Ernest Guevarra
+
+## License
+
+All code in this workflow is released under a [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html#license-text) license. All text and reports in this workflow is released under a [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/deed.en) license. All data is released under a [CC0](https://creativecommons.org/public-domain/cc0/) license.
 
