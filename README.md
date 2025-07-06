@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Seychelles Cancer Quality of Care Scoping Review
+# Seychelles Cancer Quality of Care Scoping Review <a href="https://www.tropicalmedicine.ox.ac.uk/study-with-us/msc-ihtm" target="_blank"><img src="https://podcasts.ox.ac.uk/sites/default/files/image-mirror/unpacking-fundamentals-global-health-towards-new-generation-leadership.png" width="150px" align="right" /></a> <a href="https://www.health.gov.sc/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Coat_of_arms_of_Seychelles.svg/1200px-Coat_of_arms_of_Seychelles.svg.png" width="150px" align="right" /></a>
 
 <!-- badges: start -->
 
@@ -126,7 +126,6 @@ graph LR
     direction LR
     x302aac5a349e94c8(["extraction_matrix_data"]):::skipped --> xf69487b7eb1bdf74(["data_review_report"]):::skipped
     x81531a598a877851(["extraction_matrix_data_file"]):::completed --> x302aac5a349e94c8(["extraction_matrix_data"]):::skipped
-    xe0cbc1208781fad4(["onedrive"]):::skipped --> x81531a598a877851(["extraction_matrix_data_file"]):::completed
     xa1f98815230ee6ce(["sids_list"]):::skipped --> xe888894c32b82646(["sids_islands"]):::skipped
     
   end
