@@ -13,6 +13,7 @@ text](https://img.shields.io/badge/license%20\(for%20writing\)-CC_BY_4.0-blue)](
 data](https://img.shields.io/badge/license%20\(for%20data\)-CC0-blue)](https://creativecommons.org/public-domain/cc0/)
 [![test targets
 workflow](https://github.com/OxfordIHTM/sc-ca-qoc-review/actions/workflows/test-targets-workflow.yml/badge.svg)](https://github.com/OxfordIHTM/sc-ca-qoc-review/actions/workflows/test-targets-workflow.yml)
+[![DOI](https://zenodo.org/badge/982718524.svg)](https://doi.org/10.5281/zenodo.15825328)
 <!-- badges: end -->
 
 This repository is a template for a
@@ -22,7 +23,9 @@ This repository is a template for a
 [`R`](https://cran.r-project.org/) workflow for Seychelles cancer
 quality of care scoping review.
 
-<!-- ## About the Project -->
+<!-- 
+## About the Project
+ -->
 
 ## Repository Structure
 
