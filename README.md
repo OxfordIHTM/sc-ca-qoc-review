@@ -22,7 +22,7 @@ This repository is a template for a
 [`R`](https://cran.r-project.org/) workflow for Seychelles cancer
 quality of care scoping review.
 
-## About the Project
+<!-- ## About the Project -->
 
 ## Repository Structure
 
