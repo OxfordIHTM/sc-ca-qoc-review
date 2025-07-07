@@ -120,8 +120,8 @@ graph LR
   style Graph fill:#FFFFFF00,stroke:#000000;
   subgraph Graph
     direction LR
-    x302aac5a349e94c8(["extraction_matrix_data"]):::skipped --> xf69487b7eb1bdf74(["data_review_report"]):::skipped
-    x81531a598a877851(["extraction_matrix_data_file"]):::completed --> x302aac5a349e94c8(["extraction_matrix_data"]):::skipped
+    x302aac5a349e94c8(["extraction_matrix_data"]):::skipped --> xf69487b7eb1bdf74(["data_review_report"]):::completed
+    x81531a598a877851(["extraction_matrix_data_file"]):::skipped --> x302aac5a349e94c8(["extraction_matrix_data"]):::skipped
     xa1f98815230ee6ce(["sids_list"]):::skipped --> xe888894c32b82646(["sids_islands"]):::skipped
     
   end
